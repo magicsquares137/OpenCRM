@@ -1,0 +1,385 @@
+# Arkitekt OpenCRM - Docker Compose Configuration
+# =============================================================
+# Production-ready Docker Compose configuration for orchestrating
+# the Arkitekt OpenCRM lead automation pipeline
+#
+# Features:
+# - Automated service management
+# - Volume persistence for database and logs
+# - Environment variable management
+# - Health check monitoring
+# - Auto-restart policy
+# - Resource limits
+# - Network isolation
+#
+# Usage:
+#   Start:   docker-compose up -d
+#   Stop:    docker-compose down
+#   Logs:    docker-compose logs -f lead-pipeline
+#   Restart: docker-compose restart lead-pipeline
+#   Rebuild: docker-compose up -d --build
+
+services:
+  # =============================================================
+  # Lead Pipeline Service
+  # =============================================================
+  # Main application service that fetches Meta leads and sends
+  # them via Outlook email using Microsoft Graph API
+  
+  lead-pipeline:
+    # Service metadata
+    container_name: opencrm-pipeline
+    hostname: opencrm-pipeline
+    
+    # Build configuration
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Multi-stage build targets runtime stage
+      target: runtime
+      args:
+        # Build arguments (if needed for customization)
+        PYTHON_VERSION: "3.12"
+      # Build labels for image metadata
+      labels:
+        com.opencrm.service: "lead-pipeline"
+        com.opencrm.version: "1.0.0"
+        com.opencrm.description: "Arkitekt OpenCRM lead automation pipeline"
+    
+    # Use pre-built image (alternative to building)
+    # Uncomment to use existing image instead of building
+    # image: meta-leads-outlook-automation:latest
+    
+    # Environment variables from .env file
+    # This file should contain all sensitive configuration
+    # See .env.example for required variables
+    env_file:
+      - .env
+    
+    # Additional environment variables
+    # These override values from .env file if specified
+    # Note: Most settings come from .env file via env_file directive above.
+    # Only add overrides here for container-specific paths.
+    environment:
+      # Timezone
+      - TZ=UTC
+
+      # Database configuration (container path)
+      - DB_PATH=/app/data/database/leads.db
+
+      # Logging configuration (container path)
+      - LOG_DIR=/app/logs
+      - LOG_FILE_PATH=/app/logs/application/leads_automation.log
+
+      # Health check configuration
+      - HEALTH_CHECK_PORT=8080
+      - HEALTH_CHECK_ENABLED=true
+    
+    # Port mapping for health check endpoint
+    # Format: HOST_PORT:CONTAINER_PORT
+    ports:
+      - "9010:8080"
+    
+    # Volume mounts for persistent data
+    # Ensures data survives container restarts
+    volumes:
+      # SQLite database persistence
+      - ./data:/app/data:rw
+      
+      # Application logs persistence
+      - ./logs:/app/logs:rw
+      
+      # Optional: Mount custom configuration
+      # - ./config:/app/config:ro
+      
+      # Optional: Mount custom timezone data
+      # - /etc/localtime:/etc/localtime:ro
+    
+    # Restart policy
+    # always: Always restart the container if it stops
+    # unless-stopped: Restart unless explicitly stopped
+    # on-failure: Only restart if container exits with error
+    restart: unless-stopped
+    
+    # Resource limits and reservations
+    # Prevents container from consuming all host resources
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'        # Maximum 1 CPU core
+          memory: 512M       # Maximum 512MB RAM
+        reservations:
+          cpus: '0.25'       # Minimum 0.25 CPU core
+          memory: 128M       # Minimum 128MB RAM
+    
+    # Health check configuration
+    # Monitors application health and auto-restarts if unhealthy
+    healthcheck:
+      # Health check command
+      # Attempts to verify application is running correctly
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      
+      # Health check timing
+      interval: 30s          # Check every 30 seconds
+      timeout: 10s           # Wait max 10 seconds for response
+      start_period: 40s      # Grace period on startup
+      retries: 3             # Mark unhealthy after 3 failures
+    
+    # Logging configuration for container
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"      # Maximum log file size
+        max-file: "3"        # Keep 3 log files
+        compress: "true"     # Compress rotated logs
+    
+    # Network configuration
+    networks:
+      - lead-pipeline-network
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    
+    # User mapping (already set in Dockerfile)
+    # user: "1000:1000"
+    
+    # Read-only root filesystem (optional, for extra security)
+    # Requires writable volumes for data and logs
+    # read_only: true
+    
+    # Stop grace period (time to gracefully shutdown)
+    stop_grace_period: 30s
+    
+    # Stop signal
+    stop_signal: SIGTERM
+    
+    # Dependencies (if other services are added)
+    # depends_on:
+    #   - database
+    #   - monitoring
+
+  # =============================================================
+  # Dashboard Service
+  # =============================================================
+  # Read-only web dashboard for viewing leads and email status
+
+  dashboard:
+    container_name: opencrm-dashboard
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    env_file:
+      - .env
+    environment:
+      - DB_PATH=/app/data/database/leads.db
+      - DASHBOARD_PORT=5050
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o}
+      - LLM_BASE_URL=${LLM_BASE_URL:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-}
+      - SENDER_NAME=${SENDER_NAME:-}
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./data:/app/data:rw
+    restart: unless-stopped
+    command: ["python", "dashboard.py"]
+    networks:
+      - lead-pipeline-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+# =============================================================
+# Networks
+# =============================================================
+# Define custom network for service isolation
+networks:
+  lead-pipeline-network:
+    driver: bridge
+    name: opencrm-network
+    # Network labels
+    labels:
+      com.opencrm.network: "main"
+
+# =============================================================
+# Volumes
+# =============================================================
+# Named volumes for better management (alternative to bind mounts)
+# Uncomment to use Docker-managed volumes instead of host directories
+# volumes:
+#   lead-data:
+#     name: meta-leads-data
+#     driver: local
+#     labels:
+#       com.opencrm.volume: "data"
+#   
+#   lead-logs:
+#     name: meta-leads-logs
+#     driver: local
+#     labels:
+#       com.opencrm.volume: "logs"
+
+# =============================================================
+# Additional Service Examples (for future expansion)
+# =============================================================
+
+  # Database service (if switching from SQLite to PostgreSQL)
+  # database:
+  #   image: postgres:15-alpine
+  #   container_name: meta-leads-db
+  #   environment:
+  #     - POSTGRES_DB=leads_db
+  #     - POSTGRES_USER=leads_user
+  #     - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   networks:
+  #     - lead-pipeline-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U leads_user"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Monitoring service (Prometheus + Grafana)
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: meta-leads-prometheus
+  #   volumes:
+  #     - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - prometheus-data:/prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - lead-pipeline-network
+  #   restart: unless-stopped
+
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: meta-leads-grafana
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #   volumes:
+  #     - grafana-data:/var/lib/grafana
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - lead-pipeline-network
+  #   depends_on:
+  #     - prometheus
+  #   restart: unless-stopped
+
+  # Log aggregation service (ELK Stack)
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+  #   container_name: meta-leads-elasticsearch
+  #   environment:
+  #     - discovery.type=single-node
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   volumes:
+  #     - elasticsearch-data:/usr/share/elasticsearch/data
+  #   ports:
+  #     - "9200:9200"
+  #   networks:
+  #     - lead-pipeline-network
+  #   restart: unless-stopped
+
+# =============================================================
+# Docker Compose Commands Reference
+# =============================================================
+#
+# Start all services in detached mode:
+#   docker-compose up -d
+#
+# Start and rebuild if Dockerfile changed:
+#   docker-compose up -d --build
+#
+# Stop all services:
+#   docker-compose down
+#
+# Stop and remove volumes (CAUTION: deletes data):
+#   docker-compose down -v
+#
+# View logs for all services:
+#   docker-compose logs -f
+#
+# View logs for specific service:
+#   docker-compose logs -f lead-pipeline
+#
+# Restart specific service:
+#   docker-compose restart lead-pipeline
+#
+# Execute command in running container:
+#   docker-compose exec lead-pipeline python -c "print('Hello')"
+#
+# Access container shell:
+#   docker-compose exec lead-pipeline /bin/bash
+#
+# View service status:
+#   docker-compose ps
+#
+# Scale service (multiple instances):
+#   docker-compose up -d --scale lead-pipeline=3
+#
+# Validate compose file:
+#   docker-compose config
+#
+# Pull latest images:
+#   docker-compose pull
+#
+# Build without starting:
+#   docker-compose build
+#
+# View resource usage:
+#   docker-compose top
+#
+# =============================================================
+# Production Deployment Checklist
+# =============================================================
+#
+# 1. [ ] Create .env file with all required variables
+# 2. [ ] Set appropriate LOG_LEVEL (INFO or WARNING)
+# 3. [ ] Configure resource limits based on workload
+# 4. [ ] Set up volume backups for ./data directory
+# 5. [ ] Configure log rotation and aggregation
+# 6. [ ] Implement monitoring and alerting
+# 7. [ ] Test health check endpoint
+# 8. [ ] Set up SSL/TLS if exposing services
+# 9. [ ] Configure firewall rules for exposed ports
+# 10. [ ] Document disaster recovery procedures
+# 11. [ ] Set up automated updates for base images
+# 12. [ ] Configure secrets management (Docker Secrets)
+# 13. [ ] Test rollback procedures
+# 14. [ ] Set up CI/CD pipeline integration
+# 15. [ ] Performance testing under expected load
+#
+# =============================================================
+# Troubleshooting
+# =============================================================
+#
+# Container won't start:
+#   docker-compose logs lead-pipeline
+#   docker-compose ps
+#
+# Permission issues with volumes:
+#   sudo chown -R 1000:1000 ./data ./logs
+#
+# Port already in use:
+#   Change port mapping in ports section (e.g., 9011:8080)
+#
+# Out of memory:
+#   Increase memory limit in deploy.resources.limits
+#
+# Database locked:
+#   Ensure only one instance is accessing SQLite database
+#
+# Network issues:
+#   docker-compose down
+#   docker network prune
+#   docker-compose up -d

@@ -1,0 +1,150 @@
+# Arkitekt OpenCRM - Python Dependencies
+# ==================================================
+# This file contains all required Python packages for the Arkitekt OpenCRM project
+# 
+# Project Components:
+# - Meta Lead Ads API integration
+# - Microsoft Graph API for Outlook/email operations
+# - SQLite database operations
+# - Configuration management
+# - HTTP requests and API calls
+# - Scheduling and automation
+# - Logging and monitoring
+
+# Web Dashboard
+# ---------------
+# flask: Lightweight web framework for the leads dashboard
+flask==3.0.0
+
+# Core HTTP and API libraries
+# ----------------------------
+# requests: For making HTTP requests to Meta API and Microsoft Graph API
+requests==2.31.0
+
+# urllib3: HTTP client (dependency of requests, pinned for security)
+urllib3==2.1.0
+
+# certifi: SSL certificate validation
+certifi==2023.11.17
+
+# Configuration Management
+# -------------------------
+# python-dotenv: Load environment variables from .env file for secure credential management
+python-dotenv==1.0.0
+
+# Microsoft Graph API
+# -------------------
+# msal: Microsoft Authentication Library for OAuth2 authentication with Microsoft Graph
+msal==1.26.0
+
+# requests-oauthlib: OAuth library for API authentication
+requests-oauthlib==1.3.1
+
+# Data Processing
+# ---------------
+# python-dateutil: Extended date/time parsing and manipulation
+python-dateutil==2.8.2
+
+# pytz: Timezone calculations and conversions
+pytz==2023.3.post1
+
+# Database
+# --------
+# Note: sqlite3 is included in Python standard library (no external package needed)
+# SQLAlchemy: Optional ORM if advanced database operations are needed (commented out)
+# SQLAlchemy==2.0.23
+
+# Scheduling and Automation
+# --------------------------
+# schedule: Job scheduling library for periodic lead fetching
+schedule==1.2.0
+
+# APScheduler: Advanced Python Scheduler (alternative to schedule, more robust)
+APScheduler==3.10.4
+
+# Logging and Monitoring
+# ----------------------
+# colorlog: Colored terminal output for logs (optional, for better readability)
+colorlog==6.8.0
+
+# Email and HTML Processing
+# --------------------------
+# html5lib: HTML parser for email content processing
+html5lib==1.1
+
+# bleach: HTML sanitizer for cleaning email content
+bleach==6.1.0
+
+# Markdown: Convert markdown to HTML for email formatting (optional)
+markdown==3.5.1
+
+# Utilities
+# ---------
+# python-json-logger: JSON formatted logging for better log parsing
+python-json-logger==2.0.7
+
+# tenacity: Retry library for handling transient API failures
+tenacity==8.2.3
+
+# Testing (Development)
+# ---------------------
+# pytest: Testing framework
+pytest==7.4.3
+
+# pytest-cov: Code coverage plugin for pytest
+pytest-cov==4.1.0
+
+# pytest-mock: Mocking plugin for pytest
+pytest-mock==3.12.0
+
+# responses: Mock HTTP requests for testing
+responses==0.24.1
+
+# Security
+# --------
+# cryptography: Cryptographic recipes and primitives for secure token storage
+cryptography==41.0.7
+
+# AI Email Generation
+# -------------------
+# openai: OpenAI-compatible API client (works with OpenAI, Ollama, Together, Groq, etc.)
+openai>=1.0.0
+# anthropic: Optional — only needed if using Anthropic as LLM_PROVIDER
+# anthropic>=0.45.0
+
+# Performance
+# -----------
+# cachetools: Caching utilities for API response caching
+cachetools==5.3.2
+
+# Development Tools (Optional)
+# -----------------------------
+# black: Code formatter
+# black==23.12.1
+
+# flake8: Linting tool
+# flake8==7.0.0
+
+# mypy: Static type checker
+# mypy==1.7.1
+
+# isort: Import statement organizer
+# isort==5.13.2
+
+# Additional Notes:
+# -----------------
+# 1. All versions are pinned for reproducible builds
+# 2. Regular security updates should be performed
+# 3. Use 'pip install -r requirements.txt' to install all dependencies
+# 4. For development, uncomment the development tools section
+# 5. Python 3.8+ is required for this project
+# 6. Consider using virtual environment (venv) for isolation
+#
+# Installation command:
+# pip install -r requirements.txt
+#
+# Update all packages (use with caution):
+# pip install --upgrade -r requirements.txt
+#
+# Freeze current environment:
+# pip freeze > requirements-lock.txt

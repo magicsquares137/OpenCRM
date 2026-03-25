@@ -1,0 +1,417 @@
+# =============================================================================
+# Arkitekt OpenCRM - Docker Ignore File
+# =============================================================================
+# 
+# This file specifies which files and directories should be excluded from the
+# Docker build context. Excluding unnecessary files:
+# - Reduces build context size
+# - Speeds up build time
+# - Prevents sensitive data from being copied into images
+# - Reduces final image size
+# 
+# Syntax:
+# - Lines starting with # are comments
+# - Use * as wildcard
+# - Use ** to match multiple directory levels
+# - Use ! to negate (include) a pattern
+# 
+# =============================================================================
+
+# =============================================================================
+# Environment and Configuration Files
+# =============================================================================
+# Exclude sensitive environment files - these should be mounted at runtime
+.env
+.env.*
+!.env.example
+*.env
+env.local
+.envrc
+
+# =============================================================================
+# Python Cache and Compiled Files
+# =============================================================================
+# Exclude Python bytecode and cache directories
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Compiled C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =============================================================================
+# Virtual Environments
+# =============================================================================
+# Exclude virtual environment directories
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+virtualenv/
+
+# =============================================================================
+# Version Control
+# =============================================================================
+# Exclude Git repository and related files
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+.git-credentials
+*.orig
+*.rej
+
+# =============================================================================
+# IDE and Editor Files
+# =============================================================================
+# Visual Studio Code
+.vscode/
+.vscode-test/
+*.code-workspace
+
+# PyCharm / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Eclipse
+.project
+.pydevproject
+.settings/
+
+# NetBeans
+nbproject/
+nbbuild/
+nbdist/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# =============================================================================
+# Application Data and Logs
+# =============================================================================
+# Exclude runtime data - these should be mounted as volumes
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+logs/
+*.log
+*.log.*
+log/
+
+# =============================================================================
+# Testing and Coverage
+# =============================================================================
+# Exclude test artifacts and coverage reports
+.pytest_cache/
+.pytest_tmp/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.cache/
+nosetests.xml
+test-results/
+junit/
+*.test
+*.out
+
+# =============================================================================
+# Documentation
+# =============================================================================
+# Exclude documentation files (can be kept if needed for reference)
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE
+*.md
+docs/
+doc/
+*.rst
+*.txt
+!requirements.txt
+!requirements-*.txt
+
+# =============================================================================
+# Docker Files
+# =============================================================================
+# Exclude Docker-related files (except Dockerfile itself)
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+Dockerfile.dev
+Dockerfile.test
+Dockerfile.old
+
+# =============================================================================
+# CI/CD and Deployment
+# =============================================================================
+# Exclude CI/CD configuration files
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+.azure-pipelines.yml
+Jenkinsfile
+.drone.yml
+bitbucket-pipelines.yml
+.codeship/
+.semaphore/
+
+# Kubernetes manifests
+k8s/
+kubernetes/
+*.yaml
+*.yml
+!requirements.yml
+
+# Terraform
+*.tf
+*.tfstate
+*.tfvars
+.terraform/
+
+# Ansible
+*.retry
+inventory/
+playbooks/
+
+# =============================================================================
+# Package Managers
+# =============================================================================
+# Exclude package manager files and directories
+node_modules/
+package.json
+package-lock.json
+yarn.lock
+.npm/
+.yarn/
+bower_components/
+
+# =============================================================================
+# Security and Secrets
+# =============================================================================
+# Exclude security-related files
+secrets/
+*.pem
+*.key
+*.cert
+*.crt
+*.csr
+*.p12
+*.pfx
+.secret
+.password
+credentials.json
+service-account.json
+*.key.json
+
+# =============================================================================
+# Temporary Files
+# =============================================================================
+# Exclude temporary files and directories
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+.cache/
+cache/
+
+# =============================================================================
+# Media and Large Files
+# =============================================================================
+# Exclude media files that shouldn't be in the image
+*.mp4
+*.avi
+*.mov
+*.mp3
+*.wav
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.iso
+*.dmg
+
+# =============================================================================
+# Monitoring and Profiling
+# =============================================================================
+# Exclude monitoring and profiling data
+*.prof
+*.profile
+.profiling/
+monitoring/
+
+# =============================================================================
+# Backup Files
+# =============================================================================
+# Exclude backup files
+backups/
+backup/
+*.backup
+*-backup
+*.bak
+*-old
+*.save
+
+# =============================================================================
+# Sample and Example Files
+# =============================================================================
+# Exclude example files (keep .env.example as it's needed for reference)
+examples/
+sample/
+samples/
+demo/
+demos/
+
+# =============================================================================
+# Scripts and Tools
+# =============================================================================
+# Exclude development scripts that aren't needed in production
+scripts/dev/
+scripts/local/
+scripts/test/
+tools/
+utilities/
+setup.sh
+install.sh
+dev.sh
+
+# =============================================================================
+# Custom Exclusions
+# =============================================================================
+# Add project-specific exclusions below
+
+# Exclude local development database
+local.db
+dev.db
+test.db
+
+# Exclude local configuration overrides
+config.local.json
+config.dev.json
+config.override.json
+
+# Exclude prototype and experimental code
+prototypes/
+experiments/
+sandbox/
+scratch/
+
+# Exclude design and assets not needed in production
+design/
+assets/source/
+*.psd
+*.ai
+*.sketch
+*.fig
+
+# Exclude research and notes
+research/
+notes/
+*.notes
+*.todo
+TODO.md
+NOTES.md
+
+# =============================================================================
+# Important Notes
+# =============================================================================
+# 
+# 1. Security:
+#    - Never include .env or credentials in Docker images
+#    - Use Docker secrets or environment variables at runtime
+#    - Sensitive files should be mounted as volumes, not copied
+# 
+# 2. Performance:
+#    - Smaller build context = faster builds
+#    - Exclude large files and directories you don't need
+#    - Use .dockerignore even if files are in .gitignore
+# 
+# 3. Best Practices:
+#    - Keep .dockerignore synchronized with .gitignore where applicable
+#    - Document project-specific exclusions
+#    - Test your .dockerignore: docker build --no-cache .
+#    - Check build context size: docker build . 2>&1 | grep "Sending build context"
+# 
+# 4. Debugging:
+#    - To see what's being sent to Docker daemon:
+#      tar -C . -czf - . | tar -tzv | grep -v "/$"
+#    - To check ignored files are actually ignored:
+#      docker build --progress=plain --no-cache . 2>&1 | grep COPY
+# 
+# 5. Maintenance:
+#    - Review this file periodically
+#    - Update when adding new file types to the project
+#    - Consider using glob patterns for entire categories
+# 
+# =============================================================================

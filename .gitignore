@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime data
+data/
+logs/
+
+# Environment
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
